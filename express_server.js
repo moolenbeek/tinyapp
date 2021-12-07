@@ -1,5 +1,6 @@
 // constants
-const express = require("express");
+const express = require('express');
+const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
@@ -10,6 +11,7 @@ const urlDatabase = {
 
 // server setup
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 app.set("view engine", "ejs");
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -21,12 +23,15 @@ app.get("/urls.json", (req, res) => {
 
 // render urls_new page
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  res.render("urls_new", {username: req.cookies["username"]});
 });
 
 // render urls_index
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { 
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
   res.render("urls_index", templateVars);
 });
 
@@ -34,17 +39,35 @@ app.get("/urls", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { 
     shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL]
+    longURL: urlDatabase[req.params.shortURL],
+    username: req.cookies["username"]
   };
   res.render("urls_show", templateVars);
 });
 
+// handle login
+app.post("/login", (req, res) => {
+  const user = req.body.username;
+  console.log('sign in by', user);
+
+  res.cookie('username', user);
+  res.redirect(`/urls`);
+});
+
+// handle logout
+app.post("/logout", (req, res) => {
+  console.log('sign out by user');
+
+  res.cookie('username', '');
+  res.redirect(`/urls`);
+});
+
 // create new url
 app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString(); // generates random string
-  urlDatabase[shortURL] = req.body.longURL // assigns new url key and value to object
-  console.log(urlDatabase)
-  res.redirect(`/urls/${shortURL}`); // redirects
+  const shortURL = generateRandomString();
+  urlDatabase[shortURL] = req.body.longURL; 
+  console.log('adding new url');
+  res.redirect(`/urls/${shortURL}`);
 });
 
 // url redirect
@@ -64,6 +87,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   urlDatabase[shortURL] = req.body.longURL;
+  console.log('updating url');
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -76,6 +100,10 @@ const generateRandomString = () => {
   }
   return result;
 }
+
+
+
+
 
 // Non relevant code
 app.get("/hello", (req, res) => {
