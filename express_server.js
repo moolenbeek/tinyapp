@@ -49,30 +49,38 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+// create new url
 app.post("/urls", (req, res) => {
-  const short = generateRandomString(); // generates random string
-  urlDatabase[short] = req.body.longURL // assigns new url key and value to object
+  const shortURL = generateRandomString(); // generates random string
+  urlDatabase[shortURL] = req.body.longURL // assigns new url key and value to object
   console.log(urlDatabase)
-  res.redirect(`/urls/${short}`); // redirects
+  res.redirect(`/urls/${shortURL}`); // redirects
 });
 
+// url redirect
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL]
   res.redirect(longURL);
 });
 
+// delete existing url
 app.post("/urls/:shortURL/delete", (req, res) => {
-  shortURL = req.params.shortURL;
+  const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
   res.redirect(`/urls`);
 });
 
+// update existing url
+app.post("/urls/:id", (req, res) => {
+  const shortURL = req.params.id;
+  urlDatabase[shortURL] = req.body.longURL;
+  res.redirect(`/urls/${shortURL}`);
+});
 
-
-
+// generate random tinyURL for new urls
 const generateRandomString = () => {
   const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  const result = '';
+  let result = '';
   for (let i = 0; i < 6; i++) {
       result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
   }
