@@ -61,10 +61,19 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-function generateRandomString() {
-  var randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  var result = '';
-  for ( var i = 0; i < 6; i++ ) {
+app.post("/urls/:shortURL/delete", (req, res) => {
+  shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
+  res.redirect(`/urls`);
+});
+
+
+
+
+const generateRandomString = () => {
+  const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const result = '';
+  for (let i = 0; i < 6; i++) {
       result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
   }
   return result;
