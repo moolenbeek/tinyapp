@@ -6,8 +6,14 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const { json } = require('body-parser');
 const urlDatabase = {
-  'b2xVn2': "http://www.lighthouselabs.ca",
-  '9sm5xK': "http://www.google.com"
+  b6UTxQ: {
+      longURL: "https://www.tsn.ca",
+      userID: "aJ48lW"
+  },
+  i3BoGr: {
+      longURL: "https://www.google.ca",
+      userID: "aJ48lW"
+  }
 };
 
 const users = { 
@@ -34,14 +40,29 @@ app.listen(PORT, () => {
 // render urls_new page
 app.get("/urls/new", (req, res) => {
   const userId = req.cookies['user_id'];
+  if (!userId) {
+    res.redirect('/urls')
+    return;
+  }
   res.render("urls_new", {user: users[userId]});
 });
 
 // render urls_index
 app.get("/urls", (req, res) => {
   const userId = req.cookies['user_id'];
+  const userUrlDatabase = {}
+
+  for (const x in urlDatabase) {
+    if (userId === urlDatabase[x].userID) {
+      userUrlDatabase[x] = {
+        longURL: urlDatabase[x].longURL,
+        userID: userId
+      }
+    }
+  }
+
   const templateVars = { 
-    urls: urlDatabase,
+    urls: userUrlDatabase,
     user: users[userId]
   };
   res.render("urls_index", templateVars);
@@ -74,13 +95,18 @@ app.get('/login', (req, res) => {
 
 // url redirect
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL]
-  res.redirect(longURL);
+  for (const x in urlDatabase) {
+    if (x === req.params.shortURL) {
+      res.redirect(urlDatabase[x].longURL);
+      return;
+    }
+  }
+  res.status(404).send('Error 404: url doesn\'t exist');
 });
 
 // receive info from register form
 app.post('/register', (req, res) => {
-  const userId = Math.random().toString(36).substr(2, 8);
+  let userId = Math.random().toString(36).substr(2, 8);
   const email = req.body.email;
   const password = req.body.password;
   const user = findUserByEmail(email, users);
@@ -123,22 +149,33 @@ app.post('/logout', (req, res) => {
 // create new url
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL; 
-  console.log('adding new url');
+  urlDatabase[shortURL] = {
+      longURL: req.body.longURL,
+      userID: req.cookies.user_id
+  }; 
   res.redirect(`/urls/${shortURL}`);
 });
 
 // delete existing url
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL];
+
+  if (urlDatabase[shortURL].userID === req.cookies.user_id) {
+    delete urlDatabase[shortURL];
+  }
   res.redirect(`/urls`);
 });
 
 // update existing url
 app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
-  urlDatabase[shortURL] = req.body.longURL;
+
+  if (urlDatabase[shortURL].userID === req.cookies.user_id) {
+    urlDatabase[shortURL] = {
+      longURL: req.body.longURL,
+      userID: req.cookies.user_id
+    }; 
+  }
   res.redirect(`/urls/${shortURL}`);
 });
 

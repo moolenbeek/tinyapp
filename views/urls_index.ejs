@@ -25,7 +25,7 @@
         <% for(let url in urls) { %>
           <tr>
             <td><%= url %></td>
-            <td><%= urls[url] %></td>
+            <td><%= urls[url].longURL %></td>
             <td>
               <form method="GET" action="/urls/<%= url %>">
               <button class="btn btn-outline-primary">Edit</button>
@@ -40,6 +40,16 @@
         <% } %>
       </tbody>
     </table>
+    <% if (!user) { %>
+      <div class="alert alert-danger" role="alert">
+        Sign in or Register to create new urls
+      </div>
+    <% } else if (Object.keys(urls).length === 0) { %>
+      <div class="alert alert-danger" role="alert">
+        No urls to display
+      </div>
+    <% } %>
+
   </main>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
