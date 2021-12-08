@@ -39,9 +39,7 @@ app.get("/urls/new", (req, res) => {
 
 // render urls_index
 app.get("/urls", (req, res) => {
-
   const userId = req.cookies['user_id'];
-
   const templateVars = { 
     urls: urlDatabase,
     user: users[userId]
@@ -74,12 +72,17 @@ app.get('/login', (req, res) => {
  res.render('login', {user: users[userId]});
 });
 
+// url redirect
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL]
+  res.redirect(longURL);
+});
+
 // receive info from register form
 app.post('/register', (req, res) => {
   const userId = Math.random().toString(36).substr(2, 8);
   const email = req.body.email;
   const password = req.body.password;
-
   const user = findUserByEmail(email, users);
 
   if (user) {
@@ -101,16 +104,13 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-
   const user = authenticateUser(email, password, users);
-  console.log({user});
 
   if (user) {
     res.cookie('user_id', user.id);
     res.redirect('/urls');
     return;
   }
-  // user is not authenticated
   res.status(401).send('wrong credentials!');
 });
 
@@ -120,22 +120,12 @@ app.post('/logout', (req, res) => {
   res.redirect('/urls');
 });
 
-
-
-
-
 // create new url
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL; 
   console.log('adding new url');
   res.redirect(`/urls/${shortURL}`);
-});
-
-// url redirect
-app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL]
-  res.redirect(longURL);
 });
 
 // delete existing url
@@ -149,7 +139,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   urlDatabase[shortURL] = req.body.longURL;
-  console.log('updating url');
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -167,28 +156,19 @@ const generateRandomString = () => {
 const findUserByEmail = (email, db) => {
   for (let userId in db) {
     const user = db[userId]; // => retrieve the value
-
     if (user.email === email) {
       return user;
     }
   }
-
   return false;
 };
 
 // authenticate user
 const authenticateUser = (email, password, db) => {
-
-  console.log({email,password})
-
   const user = findUserByEmail(email, db);
-
-  console.log({user});
-
   if (user && user.password === password) {
     return user;
   }
-
   return false;
 };
 

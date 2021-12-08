@@ -12,7 +12,7 @@
     </div>
 
     <% if ( user ) { %>
-      <h6 class="text-light" style="margin: auto;">Signed in as: <%= user.email %> !</h6>
+      <h6 class="text-light" style="margin: auto;"><%= user.email %></h6>
       <form class="form-inline" action="/logout" method="POST">
         <button type="submit" class="btn btn-outline-light my-2 my-sm-0" style="margin:0.75em">Sign Out</button>
       </form>
