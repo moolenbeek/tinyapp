@@ -25,7 +25,7 @@
         <% for(let url in urls) { %>
           <tr>
             <td><%= url %></td>
-            <td><%= urls[url].longURL %></td>
+            <td><a href="/u/<%= url %>" target="_blank"><%= urls[url].longURL %></a></td>
             <td>
               <form method="GET" action="/urls/<%= url %>">
               <button class="btn btn-outline-primary">Edit</button>
