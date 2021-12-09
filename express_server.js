@@ -1,37 +1,3 @@
-<<<<<<< HEAD
-// constants
-const express = require('express');
-const cookieSession = require('cookie-session');
-const bcrypt = require('bcryptjs');
-const app = express();
-const PORT = 8080; // default port 8080
-const bodyParser = require('body-parser');
-const { findUserByEmail, generateRandomString } = require('./helpers');
-
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW"
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "99ohwc99"
-  }
-};
-
-const users = {
-  "99ohwc99": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
-  "55widc55": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
-};
-=======
 const {
   methodOverride,
   cookieSession,
@@ -44,7 +10,6 @@ const {
   findUserByEmail,
   generateRandomString
 } = require('./constants');
->>>>>>> feature/method-override
 
 // server setup
 app.use(bodyParser.urlencoded({
@@ -121,13 +86,9 @@ app.get('/register', (req, res) => {
 // render login
 app.get('/login', (req, res) => {
   const userId = req.session.user_id;
-<<<<<<< HEAD
-  res.render('login', {user: users[userId]});
-=======
   res.render('login', {
     user: users[userId]
   });
->>>>>>> feature/method-override
 });
 
 // url redirect
@@ -195,12 +156,8 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
-<<<<<<< HEAD
-    userID: req.session.user_id
-=======
     userID: req.session.user_id,
     visits: 0
->>>>>>> feature/method-override
   };
   res.redirect(`/urls/${shortURL}`);
 });

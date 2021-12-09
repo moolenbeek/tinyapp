@@ -17,11 +17,7 @@ const generateRandomString = () => {
   return result;
 };
 
-<<<<<<< HEAD
-module.exports = { findUserByEmail, generateRandomString };
-=======
 module.exports = {
   findUserByEmail,
   generateRandomString
 };
->>>>>>> feature/method-override
