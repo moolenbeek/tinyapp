@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // constants
 const express = require('express');
 const cookieSession = require('cookie-session');
@@ -30,9 +31,27 @@ const users = {
     password: "dishwasher-funk"
   }
 };
+=======
+const {
+  methodOverride,
+  cookieSession,
+  bcrypt,
+  app,
+  PORT,
+  bodyParser,
+  urlDatabase,
+  users,
+  findUserByEmail,
+  generateRandomString
+} = require('./constants');
+>>>>>>> feature/method-override
 
 // server setup
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+app.use(methodOverride('X-HTTP-Method-Override'));
+app.use(methodOverride('_method'));
 app.set('trust proxy', 1); // trust first proxy
 app.use(cookieSession({
   name: 'session',
@@ -51,7 +70,9 @@ app.get("/urls/new", (req, res) => {
     res.redirect('/urls');
     return;
   }
-  res.render("urls_new", {user: users[userId]});
+  res.render("urls_new", {
+    user: users[userId]
+  });
 });
 
 // render urls_index
@@ -79,10 +100,12 @@ app.get("/urls", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const userId = req.session.user_id;
   const shortUrl = req.params.shortURL;
+
   const templateVars = {
     shortURL: shortUrl,
     longURL: urlDatabase[shortUrl],
-    user: users[userId]
+    user: users[userId],
+    visits: urlDatabase[shortUrl].visits
   };
   res.render("urls_show", templateVars);
 });
@@ -90,17 +113,27 @@ app.get("/urls/:shortURL", (req, res) => {
 // render register
 app.get('/register', (req, res) => {
   const userId = req.session.user_id;
-  res.render('register', {user: users[userId]});
+  res.render('register', {
+    user: users[userId]
+  });
 });
 
 // render login
 app.get('/login', (req, res) => {
   const userId = req.session.user_id;
+<<<<<<< HEAD
   res.render('login', {user: users[userId]});
+=======
+  res.render('login', {
+    user: users[userId]
+  });
+>>>>>>> feature/method-override
 });
 
 // url redirect
 app.get("/u/:shortURL", (req, res) => {
+  const shortUrl = req.params.shortURL;
+  urlDatabase[shortUrl].visits++;
   for (const x in urlDatabase) {
     if (x === req.params.shortURL) {
       res.redirect(urlDatabase[x].longURL);
@@ -148,7 +181,7 @@ app.post('/login', (req, res) => {
     }
     res.status(401).send('wrong credentials!');
   });
-  
+
 });
 
 // handle logout
@@ -162,13 +195,18 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
+<<<<<<< HEAD
     userID: req.session.user_id
+=======
+    userID: req.session.user_id,
+    visits: 0
+>>>>>>> feature/method-override
   };
   res.redirect(`/urls/${shortURL}`);
 });
 
 // delete existing url
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.delete("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
 
   if (urlDatabase[shortURL].userID === req.session.user_id) {
@@ -178,7 +216,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 // update existing url
-app.post("/urls/:id", (req, res) => {
+app.put("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
 
   if (urlDatabase[shortURL].userID === req.session.user_id) {
@@ -189,4 +227,3 @@ app.post("/urls/:id", (req, res) => {
   }
   res.redirect(`/urls/${shortURL}`);
 });
-
