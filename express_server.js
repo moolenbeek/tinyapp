@@ -5,17 +5,16 @@ const bcrypt = require('bcryptjs');
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
-const { json } = require('body-parser');
 const { findUserByEmail, generateRandomString } = require('./helpers');
 
 const urlDatabase = {
   b6UTxQ: {
-      longURL: "https://www.tsn.ca",
-      userID: "aJ48lW"
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW"
   },
   i3BoGr: {
-      longURL: "https://www.google.ca",
-      userID: "99ohwc99"
+    longURL: "https://www.google.ca",
+    userID: "99ohwc99"
   }
 };
 
@@ -25,7 +24,7 @@ const users = {
     email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
- "55widc55": {
+  "55widc55": {
     id: "user2RandomID",
     email: "user2@example.com",
     password: "dishwasher-funk"
@@ -66,10 +65,10 @@ app.get("/urls", (req, res) => {
       userUrlDatabase[url] = {
         longURL: db[url].longURL,
         userID: userId
-      }
+      };
     }
   }
-  const templateVars = { 
+  const templateVars = {
     urls: userUrlDatabase,
     user: users[userId]
   };
@@ -97,7 +96,7 @@ app.get('/register', (req, res) => {
 // render login
 app.get('/login', (req, res) => {
   const userId = req.session.user_id;
- res.render('login', {user: users[userId]});
+  res.render('login', {user: users[userId]});
 });
 
 // url redirect
@@ -122,9 +121,9 @@ app.post('/register', (req, res) => {
     return;
   }
   bcrypt.genSalt(10, (err, salt) => {
-  bcrypt.hash(password, salt, (err, hash) => {
+    bcrypt.hash(password, salt, (err, hash) => {
       users[userId] = {
-        id: userId, 
+        id: userId,
         email: email,
         password: hash
       };
@@ -162,8 +161,8 @@ app.post('/logout', (req, res) => {
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = {
-      longURL: req.body.longURL,
-      userID: req.session.user_id
+    longURL: req.body.longURL,
+    userID: req.session.user_id
   };
   res.redirect(`/urls/${shortURL}`);
 });
@@ -186,7 +185,7 @@ app.post("/urls/:id", (req, res) => {
     urlDatabase[shortURL] = {
       longURL: req.body.longURL,
       userID: req.session.user_id
-    }; 
+    };
   }
   res.redirect(`/urls/${shortURL}`);
 });
