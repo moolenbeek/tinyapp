@@ -1,5 +1,6 @@
 // constants
 const express = require('express');
+const methodOverride = require('method-override');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 const app = express();
@@ -34,6 +35,8 @@ const users = {
 
 // server setup
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(methodOverride('X-HTTP-Method-Override'));
+app.use(methodOverride('_method'));
 app.set('trust proxy', 1); // trust first proxy
 app.use(cookieSession({
   name: 'session',
