@@ -6,7 +6,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
 const { json } = require('body-parser');
-const { findUserByEmail } = require('./helpers')
+const { findUserByEmail, generateRandomString } = require('./helpers');
 
 const urlDatabase = {
   b6UTxQ: {
@@ -19,15 +19,15 @@ const urlDatabase = {
   }
 };
 
-const users = { 
+const users = {
   "99ohwc99": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
  "55widc55": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
 };
@@ -49,7 +49,7 @@ app.listen(PORT, () => {
 app.get("/urls/new", (req, res) => {
   const userId = req.session.user_id;
   if (!userId) {
-    res.redirect('/urls')
+    res.redirect('/urls');
     return;
   }
   res.render("urls_new", {user: users[userId]});
@@ -59,10 +59,12 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls", (req, res) => {
   const userId = req.session.user_id;
   const userUrlDatabase = {};
-  for (const x in urlDatabase) {
-    if (userId === urlDatabase[x].userID) {
-      userUrlDatabase[x] = {
-        longURL: urlDatabase[x].longURL,
+  const db = urlDatabase;
+
+  for (const url in db) {
+    if (userId === db[url].userID) {
+      userUrlDatabase[url] = {
+        longURL: db[url].longURL,
         userID: userId
       }
     }
@@ -77,9 +79,10 @@ app.get("/urls", (req, res) => {
 // render urls_show
 app.get("/urls/:shortURL", (req, res) => {
   const userId = req.session.user_id;
-  const templateVars = { 
-    shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL],
+  const shortUrl = req.params.shortURL;
+  const templateVars = {
+    shortURL: shortUrl,
+    longURL: urlDatabase[shortUrl],
     user: users[userId]
   };
   res.render("urls_show", templateVars);
@@ -110,25 +113,21 @@ app.get("/u/:shortURL", (req, res) => {
 
 // receive info from register form
 app.post('/register', (req, res) => {
-  let userId = Math.random().toString(36).substr(2, 8);
   const email = req.body.email;
   const password = req.body.password;
   const user = findUserByEmail(email, users);
-
+  let userId = Math.random().toString(36).substr(2, 8);
   if (user) {
     res.status(403).send('User already exists!');
     return;
   }
-
   bcrypt.genSalt(10, (err, salt) => {
   bcrypt.hash(password, salt, (err, hash) => {
-      console.log(hash)
-    // Store hash password in DB
       users[userId] = {
         id: userId, 
         email: email,
         password: hash
-      }
+      };
       req.session.user_id = userId;
       res.redirect('/urls');
     });
@@ -165,7 +164,7 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = {
       longURL: req.body.longURL,
       userID: req.session.user_id
-  }; 
+  };
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -192,12 +191,3 @@ app.post("/urls/:id", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-// generate random tinyURL for new urls
-const generateRandomString = () => {
-  const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < 6; i++) {
-      result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
-  }
-  return result;
-}
