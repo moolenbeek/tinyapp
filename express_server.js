@@ -1,10 +1,12 @@
 // constants
 const express = require('express');
 const cookieParser = require('cookie-parser');
+var bcrypt = require('bcryptjs');
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const { json } = require('body-parser');
+const salt = bcrypt.genSaltSync(10);
 const urlDatabase = {
   b6UTxQ: {
       longURL: "https://www.tsn.ca",
@@ -27,7 +29,7 @@ const users = {
     email: "user2@example.com", 
     password: "dishwasher-funk"
   }
-}
+};
 
 // server setup
 app.use(bodyParser.urlencoded({extended: true}));
@@ -116,11 +118,14 @@ app.post('/register', (req, res) => {
     return;
   }
 
-  users[userId] = {
-    id: userId, 
-    email: email,
-    password: password 
-  }
+  bcrypt.hash(password, salt, (err, hash) => {
+    // Store hash password in DB
+    users[userId] = {
+      id: userId, 
+      email: email,
+      password: hash
+    }
+  });
 
   res.cookie('user_id', userId);
   res.redirect('/urls');
@@ -130,14 +135,18 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const user = authenticateUser(email, password, users);
+  const user = findUserByEmail(email, users);
 
-  if (user) {
-    res.cookie('user_id', user.id);
-    res.redirect('/urls');
-    return;
-  }
-  res.status(401).send('wrong credentials!');
+  bcrypt.compare(password, user.password, (err, response) => {
+    // res == true or res == false
+    if (response) {
+      res.cookie('user_id', user.id);
+      res.redirect('/urls');
+      return;
+    }
+    res.status(401).send('wrong credentials!');
+  });
+  
 });
 
 // handle logout
@@ -196,15 +205,6 @@ const findUserByEmail = (email, db) => {
     if (user.email === email) {
       return user;
     }
-  }
-  return false;
-};
-
-// authenticate user
-const authenticateUser = (email, password, db) => {
-  const user = findUserByEmail(email, db);
-  if (user && user.password === password) {
-    return user;
   }
   return false;
 };
