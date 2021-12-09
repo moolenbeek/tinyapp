@@ -4,9 +4,9 @@ const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 const app = express();
 const PORT = 8080; // default port 8080
-const bodyParser = require("body-parser");
+const bodyParser = require('body-parser');
 const { json } = require('body-parser');
-const salt = bcrypt.genSaltSync(10);
+const { findUserByEmail } = require('./helpers')
 
 const urlDatabase = {
   b6UTxQ: {
@@ -59,8 +59,6 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls", (req, res) => {
   const userId = req.session.user_id;
   const userUrlDatabase = {};
-
-  console.log(req.session.user_id)
   for (const x in urlDatabase) {
     if (userId === urlDatabase[x].userID) {
       userUrlDatabase[x] = {
@@ -69,7 +67,6 @@ app.get("/urls", (req, res) => {
       }
     }
   }
-
   const templateVars = { 
     urls: userUrlDatabase,
     user: users[userId]
@@ -79,9 +76,7 @@ app.get("/urls", (req, res) => {
 
 // render urls_show
 app.get("/urls/:shortURL", (req, res) => {
-
   const userId = req.session.user_id;
-
   const templateVars = { 
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL],
@@ -125,17 +120,19 @@ app.post('/register', (req, res) => {
     return;
   }
 
+  bcrypt.genSalt(10, (err, salt) => {
   bcrypt.hash(password, salt, (err, hash) => {
+      console.log(hash)
     // Store hash password in DB
-    users[userId] = {
-      id: userId, 
-      email: email,
-      password: hash
-    }
+      users[userId] = {
+        id: userId, 
+        email: email,
+        password: hash
+      }
+      req.session.user_id = userId;
+      res.redirect('/urls');
+    });
   });
-
-  req.session.user_id = userId;
-  res.redirect('/urls');
 });
 
 // receive info from login form
@@ -204,14 +201,3 @@ const generateRandomString = () => {
   }
   return result;
 }
-
-// find user in db
-const findUserByEmail = (email, db) => {
-  for (let userId in db) {
-    const user = db[userId]; // => retrieve the value
-    if (user.email === email) {
-      return user;
-    }
-  }
-  return false;
-};
