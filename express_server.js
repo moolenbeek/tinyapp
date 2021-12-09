@@ -1,40 +1,20 @@
-// constants
-const express = require('express');
-const methodOverride = require('method-override');
-const cookieSession = require('cookie-session');
-const bcrypt = require('bcryptjs');
-const app = express();
-const PORT = 8080; // default port 8080
-const bodyParser = require('body-parser');
-const { json } = require('body-parser');
-const { findUserByEmail, generateRandomString } = require('./helpers');
-
-const urlDatabase = {
-  b6UTxQ: {
-      longURL: "https://www.tsn.ca",
-      userID: "aJ48lW"
-  },
-  i3BoGr: {
-      longURL: "https://www.google.ca",
-      userID: "99ohwc99"
-  }
-};
-
-const users = {
-  "99ohwc99": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
- "55widc55": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
-};
+const {
+  methodOverride,
+  cookieSession,
+  bcrypt,
+  app,
+  PORT,
+  bodyParser,
+  urlDatabase,
+  users,
+  findUserByEmail,
+  generateRandomString
+} = require('./constants');
 
 // server setup
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 app.use(methodOverride('X-HTTP-Method-Override'));
 app.use(methodOverride('_method'));
 app.set('trust proxy', 1); // trust first proxy
@@ -55,7 +35,9 @@ app.get("/urls/new", (req, res) => {
     res.redirect('/urls');
     return;
   }
-  res.render("urls_new", {user: users[userId]});
+  res.render("urls_new", {
+    user: users[userId]
+  });
 });
 
 // render urls_index
@@ -69,10 +51,10 @@ app.get("/urls", (req, res) => {
       userUrlDatabase[url] = {
         longURL: db[url].longURL,
         userID: userId
-      }
+      };
     }
   }
-  const templateVars = { 
+  const templateVars = {
     urls: userUrlDatabase,
     user: users[userId]
   };
@@ -83,10 +65,12 @@ app.get("/urls", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const userId = req.session.user_id;
   const shortUrl = req.params.shortURL;
+
   const templateVars = {
     shortURL: shortUrl,
     longURL: urlDatabase[shortUrl],
-    user: users[userId]
+    user: users[userId],
+    visits: urlDatabase[shortUrl].visits
   };
   res.render("urls_show", templateVars);
 });
@@ -94,17 +78,23 @@ app.get("/urls/:shortURL", (req, res) => {
 // render register
 app.get('/register', (req, res) => {
   const userId = req.session.user_id;
-  res.render('register', {user: users[userId]});
+  res.render('register', {
+    user: users[userId]
+  });
 });
 
 // render login
 app.get('/login', (req, res) => {
   const userId = req.session.user_id;
- res.render('login', {user: users[userId]});
+  res.render('login', {
+    user: users[userId]
+  });
 });
 
 // url redirect
 app.get("/u/:shortURL", (req, res) => {
+  const shortUrl = req.params.shortURL;
+  urlDatabase[shortUrl].visits++;
   for (const x in urlDatabase) {
     if (x === req.params.shortURL) {
       res.redirect(urlDatabase[x].longURL);
@@ -125,9 +115,9 @@ app.post('/register', (req, res) => {
     return;
   }
   bcrypt.genSalt(10, (err, salt) => {
-  bcrypt.hash(password, salt, (err, hash) => {
+    bcrypt.hash(password, salt, (err, hash) => {
       users[userId] = {
-        id: userId, 
+        id: userId,
         email: email,
         password: hash
       };
@@ -152,7 +142,7 @@ app.post('/login', (req, res) => {
     }
     res.status(401).send('wrong credentials!');
   });
-  
+
 });
 
 // handle logout
@@ -165,14 +155,15 @@ app.post('/logout', (req, res) => {
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = {
-      longURL: req.body.longURL,
-      userID: req.session.user_id
+    longURL: req.body.longURL,
+    userID: req.session.user_id,
+    visits: 0
   };
   res.redirect(`/urls/${shortURL}`);
 });
 
 // delete existing url
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.delete("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
 
   if (urlDatabase[shortURL].userID === req.session.user_id) {
@@ -182,15 +173,14 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 // update existing url
-app.post("/urls/:id", (req, res) => {
+app.put("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
 
   if (urlDatabase[shortURL].userID === req.session.user_id) {
     urlDatabase[shortURL] = {
       longURL: req.body.longURL,
       userID: req.session.user_id
-    }; 
+    };
   }
   res.redirect(`/urls/${shortURL}`);
 });
-

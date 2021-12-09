@@ -1,7 +1,8 @@
 <header>
   <nav class="navbar navbar-expand-sm navbar-dark bg-primary">
     <a class="navbar-brand" href="/urls">TinyApp</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
@@ -12,13 +13,13 @@
     </div>
 
     <% if ( user ) { %>
-      <h6 class="text-light" style="margin: auto;"><%= user.email %></h6>
-      <form class="form-inline" action="/logout" method="POST">
-        <button type="submit" class="btn btn-outline-light my-2 my-sm-0" style="margin:0.75em">Sign Out</button>
-      </form>
+    <h6 class="text-light" style="margin: auto;"><%= user.email %></h6>
+    <form class="form-inline" action="/logout" method="POST">
+      <button type="submit" class="btn btn-outline-light my-2 my-sm-0" style="margin:0.75em">Sign Out</button>
+    </form>
     <% } else { %>
-      <a href="/login"><button class="btn btn-outline-light my-2 my-sm-0" style="margin:0.75em">Sign in</button></a>
-      <a href="/register"><button class="btn btn-outline-light my-2 my-sm-0" style="margin:0.75em">Register</button></a>
+    <a href="/login"><button class="btn btn-outline-light my-2 my-sm-0" style="margin:0.75em">Sign in</button></a>
+    <a href="/register"><button class="btn btn-outline-light my-2 my-sm-0" style="margin:0.75em">Register</button></a>
     <% } %>
   </nav>
 </header>
