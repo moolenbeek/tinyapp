@@ -32,7 +32,7 @@ app.listen(PORT, () => {
 app.get("/urls/new", (req, res) => {
   const userId = req.session.user_id;
   if (!userId) {
-    res.redirect('/urls');
+    res.redirect('/login');
     return;
   }
   res.render("urls_new", {
@@ -45,6 +45,12 @@ app.get("/urls", (req, res) => {
   const userId = req.session.user_id;
   const userUrlDatabase = {};
   const db = urlDatabase;
+
+  // redirect to login if no user logged in
+  if (!userId) {
+    res.redirect('/login');
+    return;
+  }
 
   for (const url in db) {
     if (userId === db[url].userID) {
