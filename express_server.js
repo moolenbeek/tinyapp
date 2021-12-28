@@ -114,6 +114,13 @@ app.get("/u/:shortURL", (req, res) => {
 app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+
+  // show error message if email or password is blank
+  if (!email || !password) {
+    res.status(401).send('email and password cannot be blank');
+    return;
+  }
+
   const user = findUserByEmail(email, users);
   let userId = Math.random().toString(36).substr(2, 8);
   if (user) {
