@@ -28,6 +28,11 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
+app.get("/", (req, res) => {
+  const userId = req.session.user_id;
+    res.redirect('/login');
+});
+
 // render urls_new page
 app.get("/urls/new", (req, res) => {
   const userId = req.session.user_id;
@@ -72,6 +77,17 @@ app.get("/urls/:shortURL", (req, res) => {
   const userId = req.session.user_id;
   const shortUrl = req.params.shortURL;
 
+    // redirect to login if no user logged in
+    if (!userId) {
+      res.redirect('/login');
+      return;
+    }
+
+    // if user is logged in and doesn't own url give error message
+    if (userId !== urlDatabase[shortUrl].userID) {
+      res.status(401).send('Error 401 : you do not own this url');
+      return;
+    }
   const templateVars = {
     shortURL: shortUrl,
     longURL: urlDatabase[shortUrl],
@@ -84,6 +100,7 @@ app.get("/urls/:shortURL", (req, res) => {
 // render register
 app.get('/register', (req, res) => {
   const userId = req.session.user_id;
+
   res.render('register', {
     user: users[userId]
   });
