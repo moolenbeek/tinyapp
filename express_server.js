@@ -23,11 +23,6 @@ app.use(cookieSession({
   keys: ['key1', 'key2']
 }));
 
-app.set("view engine", "ejs");
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
-
 app.get("/", (req, res) => {
   const userId = req.session.user_id;
     res.redirect('/login');
@@ -213,4 +208,9 @@ app.put("/urls/:id", (req, res) => {
     };
   }
   res.redirect(`/urls/${shortURL}`);
+});
+
+app.set("view engine", "ejs");
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });
