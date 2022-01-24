@@ -25,7 +25,14 @@ app.use(cookieSession({
 
 app.get("/", (req, res) => {
   const userId = req.session.user_id;
-    res.redirect('/login');
+
+  if (!userId) {
+    res.redirect('/register');
+    return;
+  } else {
+    res.redirect('/urls')
+  }
+    
 });
 
 // render urls_new page
@@ -178,13 +185,23 @@ app.post('/logout', (req, res) => {
 
 // create new url
 app.post("/urls", (req, res) => {
+  const userId = req.session.user_id;
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = {
-    longURL: req.body.longURL,
-    userID: req.session.user_id,
-    visits: 0
-  };
-  res.redirect(`/urls/${shortURL}`);
+
+  if (userId) {
+    urlDatabase[shortURL] = {
+      longURL: req.body.longURL,
+      userID: userId,
+      visits: 0
+    };
+    res.redirect(`/urls/${shortURL}`);
+    return;
+  } else {
+    res.status(401).send('error 401: must be logged in to create urls');
+    return;
+  }
+
+  
 });
 
 // delete existing url
