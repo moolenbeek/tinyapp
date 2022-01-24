@@ -55,7 +55,7 @@ app.get("/urls", (req, res) => {
 
   // redirect to login if no user logged in
   if (!userId) {
-    res.redirect('/login');
+    res.status(401).send('Error 401 : must be logged in to view urls');
     return;
   }
 
@@ -81,7 +81,7 @@ app.get("/urls/:shortURL", (req, res) => {
 
     // redirect to login if no user logged in
     if (!userId) {
-      res.redirect('/login');
+      res.status(401).send('Error 401 : must be logged in to view urls');
       return;
     }
 
